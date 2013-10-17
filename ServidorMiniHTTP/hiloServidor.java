@@ -1,9 +1,4 @@
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -12,29 +7,54 @@ import java.net.Socket;
  */
 class hiloServidor extends Thread {
     private Socket skCliente;
-    private Socket skControlador;
+    private String host = "localhost";
+    private int port = 9876;
+    private BufferedReader entrada;
+    private PrintWriter salida;
     
     public hiloServidor(Socket skCliente) {
         this.skCliente = skCliente;
     }
-
-    public hiloServidor(Socket skCliente, Socket skControlador) {
-        this.skCliente = skCliente;
-        this.skControlador = skControlador;
-    }
     
     @Override
     public void run(){
-        String cadena;
-        cadena = leeSocket(skCliente);
+        /*
+            1º Se lee la petición HTTP del cliente
+                1.1 Previamente se debe establecer el flujo de entrada
+            2º Se obtiene la URL de la petición
+                2.1 Se puede formatear o enviar tal cual
+            3º Se envía la URL al controlador
+                3.1 Se debe establecer el flujo de salida 
+            4º Se recibe la respuesta del controlador
+                4.1 Se deber cambiar el flujo de entrada al controlador
+                4.2 Parsear la respuesta (tipoSensor,valor)
+                4.3 Una vez recibida la respuesta cerrar conexión con controlador
+            5º Se crea la respuesta HTTP que se enviará
+                5.1 Basta con introducir el resultado entre etiquetas <p></p>
+            6º Se envia la respuesta HTTP al cliente
+                6.1 Enviar primero estado luego línea en blanco y html
+        */
+        String cadena = "";
+        try {
+            establecerFlujos(skCliente);
+            cadena = leeSocket();
+            String aux = "";
+            do{
+                aux = leeSocket();
+                System.out.println(aux);
+            }while(!aux.equals("")); 
+        } catch (Exception ex) {
+            System.err.println(ex.getMessage());
+        }
+        
         String[] peticion = cadena.split(" ");
         String metodo = peticion[0];
         String url = peticion[1];
         String httpVerison = peticion[2];
         String codigoEstado = "200";
         String mensajeEstado = "OK";
-        String cabeceraHTML = "<html><head></head><body>";
-        String respuesta = "";
+        String cabeceraHTML = "<html><head><title>Prueba</title></head><body>";
+        String respuesta = "<p>Hola</p>";
         String pieHTML = "</body></html>";
         if (metodo.equals("GET")){
             //escribeSocket(skControlador,url);
@@ -45,42 +65,59 @@ class hiloServidor extends Thread {
         }
         String estado = httpVerison + codigoEstado + mensajeEstado;
         String cuerpo =  cabeceraHTML + respuesta + pieHTML;
-        String[] mensajeHTML = new String[3];
-        mensajeHTML[0] = estado;
-        mensajeHTML[1] = "\n";
-        mensajeHTML[2] = cuerpo;
-        escribeSocket(skCliente,mensajeHTML[0]);
+        
         //escribeSocket(cadena);
+        try{
+            escribeSocket(estado);
+            escribeSocket("");
+            escribeSocket(cuerpo);
+            skCliente.close();
+        }catch (IOException ex){
+            System.err.println(ex.getMessage());
+        }
     }
 
-    private String leeSocket(Socket socket) {
-        InputStream flujoEntrada = null;
-        String cadena = "";
-        try {
-            flujoEntrada = socket.getInputStream();
-            BufferedReader socketInput = new BufferedReader(new InputStreamReader(flujoEntrada));
-            cadena = socketInput.readLine();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        } finally {
-            try {
-                flujoEntrada.close();
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }
-        }
-        return cadena;
+    /**
+    * Establece los flujos de entrada y salida con un socket.
+    * \param socket Socket con el que se establecerá la conexión.
+    **/
+    private void establecerFlujos(Socket socket) throws IOException {
+        establecerFlujoEntrada(socket);
+        establecerFlujoSalida(socket);
     }
 
-    private void escribeSocket(Socket socket, String cadena) {
-       try {
-            OutputStream aux = skCliente.getOutputStream();
-            DataOutputStream flujo= new DataOutputStream( aux );
-            flujo.writeUTF(cadena);      
-        }
-        catch (Exception e)
-        {
-            System.out.println("Error: " + e.toString());
-        }
+    /**
+    * Establece el flujos de entrada con un socket.
+    * \param socket Socket con el que se establecerá la conexión.
+    **/
+    private void establecerFlujoEntrada(Socket socket) throws IOException {
+        InputStream flujoEntrada = socket.getInputStream();
+        entrada = new BufferedReader(new InputStreamReader(flujoEntrada));
+    }
+
+    /**
+    * Establece el flujos de salida con un socket.
+    * \param socket Socket con el que se establecerá la conexión.
+    **/
+    private void establecerFlujoSalida(Socket socket) throws IOException {
+        OutputStream flujoSalida = socket.getOutputStream();
+        salida = new PrintWriter(new OutputStreamWriter(flujoSalida));
+    }
+
+    /**
+    * Lee un mensaje del socket.
+    * \return mensaje leído del socket.
+    **/
+    private String leeSocket() throws IOException {
+        return entrada.readLine();
+    }
+
+    /**
+    * Escribre un mensaje en el socket.
+    * \param cadena Mensaje que se escribirá en el socket
+    **/
+    private void escribeSocket(String cadena) throws IOException {
+       salida.println(cadena);
+       salida.flush();
     }
 }
