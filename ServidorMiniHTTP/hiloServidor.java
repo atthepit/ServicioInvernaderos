@@ -5,73 +5,92 @@ import java.net.Socket;
  *
  * @author mesmerismo
  */
-class hiloServidor extends Thread {
+class HiloServidor extends Thread {
     private Socket skCliente;
     private String host = "localhost";
     private int port = 9876;
     private BufferedReader entrada;
     private PrintWriter salida;
     
-    public hiloServidor(Socket skCliente) {
+    public HiloServidor(Socket skCliente) {
         this.skCliente = skCliente;
     }
     
     @Override
     public void run(){
-        /*
-            1º Se lee la petición HTTP del cliente
-                1.1 Previamente se debe establecer el flujo de entrada
-            2º Se obtiene la URL de la petición
-                2.1 Se puede formatear o enviar tal cual
-            3º Se envía la URL al controlador
-                3.1 Se debe establecer el flujo de salida 
-            4º Se recibe la respuesta del controlador
-                4.1 Se deber cambiar el flujo de entrada al controlador
-                4.2 Parsear la respuesta (tipoSensor,valor)
-                4.3 Una vez recibida la respuesta cerrar conexión con controlador
-            5º Se crea la respuesta HTTP que se enviará
-                5.1 Basta con introducir el resultado entre etiquetas <p></p>
-            6º Se envia la respuesta HTTP al cliente
-                6.1 Enviar primero estado luego línea en blanco y html
-        */
         String cadena = "";
-        try {
-            establecerFlujos(skCliente);
-            cadena = leeSocket();
-            String aux = "";
-            do{
-                aux = leeSocket();
-                System.out.println(aux);
-            }while(!aux.equals("")); 
-        } catch (Exception ex) {
-            System.err.println(ex.getMessage());
-        }
-        
-        String[] peticion = cadena.split(" ");
-        String metodo = peticion[0];
-        String url = peticion[1];
-        String httpVerison = peticion[2];
+        String[] peticion = null;
+        String metodo = "";
+        String url = "";
+        String httpVerison = "";
         String codigoEstado = "200";
         String mensajeEstado = "OK";
-        String cabeceraHTML = "<html><head><title>Prueba</title></head><body>";
+        String cabeceraHTML = "<html><head><title>Servicio Invernaderos</title></head><body>";
         String respuesta = "<p>Hola</p>";
         String pieHTML = "</body></html>";
-        if (metodo.equals("GET")){
-            //escribeSocket(skControlador,url);
-        } else {
-            codigoEstado = "400";
-            mensajeEstado = "Bad Request";
-            respuesta = "<p>El metodo HTTP " + metodo + " no es soportado en esta practica.</p>";
-        }
-        String estado = httpVerison + codigoEstado + mensajeEstado;
-        String cuerpo =  cabeceraHTML + respuesta + pieHTML;
+        String estado = "";
+        String cuerpo = "";
+
+        try {
+            System.out.println("Establenciendo flujo de entrada con el cliente.");  
+            establecerFlujoEntrada(skCliente);
+            System.out.println("Leyendo peticion del cliente.");
+            cadena = leeSocket();
+            System.out.println(cadena);
+            
+            if (cadena != null) {
+                peticion = cadena.split(" ");
+
+                if (peticion.length == 3) {
+                    metodo = peticion[0];
+                    url = peticion[1];
+                    httpVerison = peticion[2];
+                    if(metodo.equals("GET")) {
+                        /*System.out.println("Conectando con el controlador.");
+                        Socket skControlador = new Socket(host,port);
+                        establecerFlujos(skControlador);
+                        System.out.println("Enviando petición al controlador.");
+                        escribeSocket(url);
+                        System.out.println("Esperando para recibir respuesta.");
+                        cadena = leeSocket();
+                        System.out.println(cadena);
+                        skControlador.close();
+                        System.out.println("Terminada conexion con el controlador.");*/
+                        if (cadena != "") {
+                            respuesta = "<p>" + cadena + "</p>";
+                        } else { 
+                            codigoEstado = "404";
+                            mensajeEstado = "Not Found";
+                            respuesta = "<p>El recurso solicitado '" + url + "' no existe.</p>";
+                        }
+                    } else {
+                        codigoEstado = "400";
+                        mensajeEstado = "Bad Request";
+                        respuesta = "<p>El metodo HTTP '" + metodo + "' no es soportado en esta practica.</p>";
+                    }
+                } else { 
+                    codigoEstado = "400";
+                    mensajeEstado = "Bad Request";
+                    respuesta = "<p>La peticion '" + cadena + "' no tiene el formato correcto.</p>";
+                }
+            } else {
+                codigoEstado = "400";
+                mensajeEstado = "Bad Request";
+                respuesta = "<p>La peticion '" + cadena + "' no tiene el formato correcto.</p>";
+            }
+
+            estado = httpVerison + codigoEstado + mensajeEstado;
+            cuerpo =  cabeceraHTML + respuesta + pieHTML;
         
-        //escribeSocket(cadena);
-        try{
+            System.out.println("Devolviendo datos al cliente.");
+            establecerFlujoSalida(skCliente);
             escribeSocket(estado);
             escribeSocket("");
             escribeSocket(cuerpo);
+            System.out.println("Mensaje enviado.");
+
             skCliente.close();
+            System.out.println("Conexion cerrada con el cliente.");
         }catch (IOException ex){
             System.err.println(ex.getMessage());
         }
@@ -119,5 +138,17 @@ class hiloServidor extends Thread {
     private void escribeSocket(String cadena) throws IOException {
        salida.println(cadena);
        salida.flush();
+    }
+
+    private String obtenerPeticionCliente() throws IOException {
+        String cadena = null;
+        
+        cadena = leeSocket();
+        /*String aux = "";
+        do{
+            aux = leeSocket();
+        }while(!aux.equals("")); 
+*/
+        return cadena;
     }
 }

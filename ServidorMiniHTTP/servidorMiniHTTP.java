@@ -12,14 +12,14 @@ public class servidorMiniHTTP {
         int puerto = 8080;
         
             ServerSocket skServidor = new ServerSocket(puerto);
-            Socket skControlador = new Socket("localhost",puerto);
+            //Socket skControlador = new Socket("localhost",puerto);
             System.out.println("Servidor activo.");
             System.out.println("Escuchando puerto " + puerto);
         try{
             for(;;){
                 Socket skCliente = skServidor.accept();
                 System.out.println("Sirviendo cliente...");
-                Thread hilo = new hiloServidor(skCliente,skControlador);
+                Thread hilo = new HiloServidor(skCliente);
                 hilo.start();
             }
         } catch (Exception ex) {
