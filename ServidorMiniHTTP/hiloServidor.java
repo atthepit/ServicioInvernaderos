@@ -37,7 +37,7 @@ class HiloServidor extends Thread {
             System.out.println("Leyendo peticion del cliente.");
             cadena = leeSocket();
             System.out.println(cadena);
-            
+
             if (cadena != null) {
                 peticion = cadena.split(" ");
 
@@ -46,7 +46,7 @@ class HiloServidor extends Thread {
                     url = peticion[1];
                     httpVerison = peticion[2];
                     if(metodo.equals("GET")) {
-                        /*System.out.println("Conectando con el controlador.");
+                        System.out.println("Conectando con el controlador.");
                         Socket skControlador = new Socket(host,port);
                         establecerFlujos(skControlador);
                         System.out.println("Enviando petición al controlador.");
@@ -55,9 +55,15 @@ class HiloServidor extends Thread {
                         cadena = leeSocket();
                         System.out.println(cadena);
                         skControlador.close();
-                        System.out.println("Terminada conexion con el controlador.");*/
+                        System.out.println("Terminada conexion con el controlador.");
                         if (cadena != "") {
-                            respuesta = "<p>" + cadena + "</p>";
+                            if (cadena != "ERROR") {
+                                respuesta = "<p>" + cadena + "</p>";
+                            } else {
+                                codigoEstado = "500";
+                                mensajeEstado = "Internal Server Error";
+                                respuesta = "<p>Ha habido algun fallo en el servidor.<br>Disculpen las molestias.</p>";    
+                            }
                         } else { 
                             codigoEstado = "404";
                             mensajeEstado = "Not Found";
@@ -138,17 +144,5 @@ class HiloServidor extends Thread {
     private void escribeSocket(String cadena) throws IOException {
        salida.println(cadena);
        salida.flush();
-    }
-
-    private String obtenerPeticionCliente() throws IOException {
-        String cadena = null;
-        
-        cadena = leeSocket();
-        /*String aux = "";
-        do{
-            aux = leeSocket();
-        }while(!aux.equals("")); 
-*/
-        return cadena;
     }
 }

@@ -7,12 +7,11 @@ import java.net.Socket;
  *
  * @author mesmerismo
  */
-public class servidorMiniHTTP {
+public class ServidorMiniHTTP {
     public static void main(String[] args) throws IOException{
         int puerto = 8080;
         
             ServerSocket skServidor = new ServerSocket(puerto);
-            //Socket skControlador = new Socket("localhost",puerto);
             System.out.println("Servidor activo.");
             System.out.println("Escuchando puerto " + puerto);
         try{
