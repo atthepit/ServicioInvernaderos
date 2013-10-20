@@ -1,5 +1,8 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 class HiloControlador extends Thread {
 	Socket skServidor;
@@ -25,21 +28,31 @@ class HiloControlador extends Thread {
 		String accion = "";
 		String tipo = "";
 		String valor = "";
+		DateFormat dateFormat = null;
+		Date date = null;
+		String fecha = "";
+		String cabeceraHTML = "<html><head><title>Servicio Invernaderos</title><meta charset=\"UTF-8\" /></head><body>";
 		String respuesta = "";
+		String pieHTML = "</body></html>";
 		String host = "localhost";
 		String port = "8765";
 
 		try {
+			System.out.println("Estableciendo conexión con el servidor miniHTTP");
 			establecerFlujos(skServidor);
+			System.out.println("Leyendo peticion...");
 			cadena = leeSocket();
+			System.out.println(cadena);
 			if (cadena != null) {
 				if (cadena != "") {
 					peticion = cadena.split("/");
 					if (peticion.length == 5) {
 						objetoRemoto = peticion[1] + "/" + peticion[2] + "/";
 						if (peticion[3].equals("sensor")) {
+							System.out.println("Solcicitando sensor " + peticion[4] + "al servidor de nombres");
 							objetoRemoto += peticion[3] + "/" + peticion[4];
 						} else if (peticion[3].equals("actuador")) {
+							System.out.println("Solicitando actuador del " + peticion[2]);
 							objetoRemoto += peticion[3];
 							accion = peticion[4];
 						}
@@ -48,17 +61,33 @@ class HiloControlador extends Thread {
 							//System.setSecurityManager(new RMISecurityManager());
 							if (accion.equals("")) {
 								//sensor = (iSensor) Naming.lookup(servidorRMI);
+								System.out.println("Obteniendo valor del sensor " + peticion[4] + ": ");
 								tipo = "temperatura";//sensor.getTipo();
 								valor = "24";//sensor.getValor().toString();
-								respuesta = "La " + tipo + " del invernadero " + peticion[2] + " es " + valor;
+								if(tipo.equals("temperatura")) {
+									valor += "ºC"; //TODO: Añadir comprobacion de valores
+								} else {
+									valor += "%";
+								}
+								dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+								date = new Date();
+								fecha = dateFormat.format(date);
+								respuesta = fecha + ": La " + tipo + " del invernadero " + peticion[2] + " es " + valor;
+								System.out.println(respuesta);
 							} else {
 								//actuador = (iActuador) Naming.lookup(servidorRMI);
+								System.out.println("Realizando accion...");
 								boolean realizado = true;//actuador.realizarAccion(accion);
+								dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+								date = new Date();
+								fecha = dateFormat.format(date);
 								if (realizado) {
-									respuesta = "El actuador del invernadero " + peticion[2] + "ha realizado la accion " + accion + "con exito";
+									respuesta = fecha + ": El actuador del invernadero " + peticion[2] + "ha realizado la accion " 
+												+ accion + "con exito";
 								} else {
 									respuesta = "ERROR";
 								}
+								System.out.println(respuesta);
 							}
 						} catch (Exception ex) {
 							System.err.println("Error:" + ex.getMessage());
@@ -69,8 +98,11 @@ class HiloControlador extends Thread {
 			sensor = null;
 			actuador = null;
 
-			escribeSocket(respuesta);
+			System.out.println("Enviando la respuesta al servidor miniHTTP");
+			escribeSocket(cabeceraHTML + "<p>" + respuesta + "</p>" + pieHTML);
+			System.out.println("Respuesta enviada");
 			skServidor.close();
+			System.out.println("Cerrada conexion con servidor miniHTTP");
 
 		} catch (IOException ex) {
 			System.err.println(ex.getMessage());

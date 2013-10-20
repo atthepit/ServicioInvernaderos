@@ -20,16 +20,20 @@ class HiloServidor extends Thread {
     public void run(){
         String cadena = "";
         String[] peticion = null;
+        String respuesta = "";
         String metodo = "";
         String url = "";
         String httpVerison = "";
         String codigoEstado = "200";
         String mensajeEstado = "OK";
-        String cabeceraHTML = "<html><head><title>Servicio Invernaderos</title></head><body>";
-        String respuesta = "<p>Hola</p>";
-        String pieHTML = "</body></html>";
         String estado = "";
         String cuerpo = "";
+        String cabeceras = "";
+        String conection = "Connection: close;\n";
+        String contentLength = "Content-Lenght: ";
+        String contentTipe = "Content-Type: text/html;\n";
+        String server = "Server: Controlador/1.0";
+
 
         try {
             System.out.println("Establenciendo flujo de entrada con el cliente.");  
@@ -52,45 +56,43 @@ class HiloServidor extends Thread {
                         System.out.println("Enviando petición al controlador.");
                         escribeSocket(url);
                         System.out.println("Esperando para recibir respuesta.");
-                        cadena = leeSocket();
-                        System.out.println(cadena);
+                        respuesta = leeSocket();
+                        System.out.println(respuesta);
                         skControlador.close();
                         System.out.println("Terminada conexion con el controlador.");
-                        if (cadena != "") {
-                            if (cadena != "ERROR") {
-                                respuesta = "<p>" + cadena + "</p>";
+                        if (respuesta != "") {
+                            if (respuesta != "ERROR") {
+                                
                             } else {
                                 codigoEstado = "500";
                                 mensajeEstado = "Internal Server Error";
-                                respuesta = "<p>Ha habido algun fallo en el servidor.<br>Disculpen las molestias.</p>";    
                             }
                         } else { 
                             codigoEstado = "404";
                             mensajeEstado = "Not Found";
-                            respuesta = "<p>El recurso solicitado '" + url + "' no existe.</p>";
                         }
                     } else {
                         codigoEstado = "400";
                         mensajeEstado = "Bad Request";
-                        respuesta = "<p>El metodo HTTP '" + metodo + "' no es soportado en esta practica.</p>";
                     }
                 } else { 
                     codigoEstado = "400";
                     mensajeEstado = "Bad Request";
-                    respuesta = "<p>La peticion '" + cadena + "' no tiene el formato correcto.</p>";
                 }
             } else {
                 codigoEstado = "400";
                 mensajeEstado = "Bad Request";
-                respuesta = "<p>La peticion '" + cadena + "' no tiene el formato correcto.</p>";
             }
-
+            
             estado = httpVerison + codigoEstado + mensajeEstado;
-            cuerpo =  cabeceraHTML + respuesta + pieHTML;
+            contentLength += respuesta.length()+";\n";
+            cabeceras = conection + contentTipe + contentLength + server;
+            cuerpo = respuesta;
         
             System.out.println("Devolviendo datos al cliente.");
             establecerFlujoSalida(skCliente);
             escribeSocket(estado);
+            escribeSocket(cabeceras);
             escribeSocket("");
             escribeSocket(cuerpo);
             System.out.println("Mensaje enviado.");
