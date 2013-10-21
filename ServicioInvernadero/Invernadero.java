@@ -48,6 +48,18 @@ public class Invernadero extends UnicastRemoteObject
 
 	}
 
+	public int getSensorTemperatura() {
+		return sensorTemperatura;
+	}
+
+	public int getSensorHumedad() {
+		return sensorHumedad;
+	}
+
+	public int getActuador() {
+		return actuador;
+	}
+
 	public int getTemperatura() {
 		return 24;
 	}
