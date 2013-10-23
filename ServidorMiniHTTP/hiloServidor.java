@@ -44,7 +44,6 @@ class HiloServidor extends Thread {
 
             if (cadena != null) {
                 peticion = cadena.split(" ");
-
                 if (peticion.length == 3) {
                     metodo = peticion[0];
                     url = peticion[1];
@@ -56,51 +55,49 @@ class HiloServidor extends Thread {
                         System.out.println("Enviando petición al controlador.");
                         escribeSocket(url);
                         System.out.println("Esperando para recibir respuesta.");
-                        respuesta = leeSocket();
+                        respuesta = obtenerRespuestaControlador();
                         System.out.println(respuesta);
                         skControlador.close();
                         System.out.println("Terminada conexion con el controlador.");
-                        if (respuesta != "") {
-                            if (respuesta != "ERROR") {
-                                
-                            } else {
-                                codigoEstado = "500";
-                                mensajeEstado = "Internal Server Error";
-                            }
-                        } else { 
-                            codigoEstado = "404";
-                            mensajeEstado = "Not Found";
-                        }
                     } else {
-                        codigoEstado = "400";
-                        mensajeEstado = "Bad Request";
+                        throw new Exception("404");
                     }
                 } else { 
-                    codigoEstado = "400";
-                    mensajeEstado = "Bad Request";
+                    throw new Exception("400");
                 }
             } else {
-                codigoEstado = "400";
-                mensajeEstado = "Bad Request";
+                throw new Exception("400");
             }
-            
+        } catch (Exception ex) {
+            String mensaje = ex.getMessage();
+            codigoEstado = mensaje;
+            respuesta = "";
+            if(codigoEstado.equals("400")) {
+                mensajeEstado = "BAD REQUEST";
+            } else if(codigoEstado.equals("404")) {
+                mensajeEstado = "NOT FOUND";
+            } else {
+                codigoEstado = "500";
+                mensajeEstado = "INTERNAL SERVER ERROR";
+            }
+        } finally {
             estado = httpVerison + codigoEstado + mensajeEstado;
             contentLength += respuesta.length()+";\n";
             cabeceras = conection + contentTipe + contentLength + server;
             cuerpo = respuesta;
-        
-            System.out.println("Devolviendo datos al cliente.");
-            establecerFlujoSalida(skCliente);
-            escribeSocket(estado);
-            escribeSocket(cabeceras);
-            escribeSocket("");
-            escribeSocket(cuerpo);
-            System.out.println("Mensaje enviado.");
-
-            skCliente.close();
-            System.out.println("Conexion cerrada con el cliente.");
-        }catch (IOException ex){
-            System.err.println(ex.getMessage());
+            try{
+                System.out.println("Devolviendo datos al cliente.");
+                establecerFlujoSalida(skCliente);
+                escribeSocket(estado);
+                escribeSocket(cabeceras);
+                escribeSocket("");
+                escribeSocket(cuerpo);
+                System.out.println("Mensaje enviado.");
+                skCliente.close();
+                System.out.println("Conexion cerrada con el cliente.");
+            } catch(IOException ex) {
+                System.err.println(ex.getMessage());
+            }
         }
     }
 
@@ -146,5 +143,19 @@ class HiloServidor extends Thread {
     private void escribeSocket(String cadena) throws IOException {
        salida.println(cadena);
        salida.flush();
+    }
+
+    private String obtenerRespuestaControlador() throws Exception {
+        String respuesta = leeSocket();
+        if (respuesta == null) {
+            throw new Exception("500");
+        } else if(respuesta.equals("400")) {
+            throw new Exception("400");
+        } else if(respuesta.equals("404")) {
+            throw new Exception("404");
+        } else if(respuesta.equals("500")) {
+            throw new Exception("500");
+        }
+        return respuesta;
     }
 }

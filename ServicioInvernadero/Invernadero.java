@@ -3,48 +3,49 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 public class Invernadero extends UnicastRemoteObject 
-						  implements InterfazRemoto, Serializable {
+						  implements iInvernadero, Serializable {
 	private int sensorTemperatura;
 	private int sensorHumedad;
 	private int actuador;
 	private int id;
 
-	public Invernadero(int id) {
+	public Invernadero(int id) throws java.rmi.RemoteException {
+		super();
 		this.id = id;
 		sensorTemperatura = -1;
 		sensorHumedad = -1;
 		actuador = -1;
 	}
 
-	public void setSensorTemperatura(int sensor) {
-		if(this.sensorTemperatura != -1) {
+	public void setSensorTemperatura(int sensor) throws Exception {
+		if(this.sensorTemperatura == -1) {
 			this.sensorTemperatura = sensor;
 		} else {
-			throw new Excetpion("El invernadero " + id + " ya contiene un sensor de Temperatura");
+			throw new Exception("El invernadero " + id + " ya contiene un sensor de Temperatura");
 		}
 	}
 
-	public void setSensorHumedad(int sensor) {
-		if(this.sensorHumedad != -1) {
+	public void setSensorHumedad(int sensor) throws Exception {
+		if(this.sensorHumedad == -1) {
 			this.sensorHumedad = sensor;
 		} else {
-			throw new Excetpion("El invernadero " + id + " ya contiene un sensor de Humedad"); 
+			throw new Exception("El invernadero " + id + " ya contiene un sensor de Humedad"); 
 		}
 	}
 
-	public void setActuador(int actuador) {
-		if(this.actuador != -1) {
+	public void setActuador(int actuador) throws Exception {
+		if(this.actuador == -1) {
 			this.actuador = actuador;
 		} else {
-			throw new Excetpion("El invernadero " + id + " ya contiene un Actuador");
+			throw new Exception("El invernadero " + id + " ya contiene un Actuador");
 		}
 	}
 
-	public void setTemperatura(int temperatura) {
+	public void setTemperatura(int temperatura) throws Exception {
 
 	}
 
-	public void setHumedad(int humedad) {
+	public void setHumedad(int humedad) throws Exception {
 
 	}
 

@@ -3,17 +3,18 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 public class Actuador extends UnicastRemoteObject 
-						  implements InterfazRemoto, Serializable {
+						  implements iActuador, Serializable {
   	private int id;
   	private int invernadero;
 
-  	public Actuador(int id) {
+  	public Actuador(int id) throws java.rmi.RemoteException {
+      super();
   		this.id = id;
-  		this.invernadero = "";
+  		this.invernadero = -1;
   	}
 
-  	public void setInvernadero(int invernadero) {
-  		if (this.invernadero != "") {
+  	public void setInvernadero(int invernadero) throws Exception {
+  		if (this.invernadero == -1) {
   			this.invernadero = invernadero;
   		} else {
   			throw new Exception("El actuador " + id + " ya pertenece al invernadero " + invernadero);

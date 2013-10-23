@@ -3,27 +3,28 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 public class Sensor extends UnicastRemoteObject 
-						  implements InterfazRemoto, Serializable {
+						  implements iSensor, Serializable {
 	private String tipo;
 	private int invernadero;
 	private int id;
 
-	public Sensor(int id) {
+	public Sensor(int id) throws java.rmi.RemoteException {
+		super();
 		this.id = id;
-		this.invernadero = "";
+		this.invernadero = -1;
 		this.tipo = "";
 	}
 
-	public void setTipo(String tipo) {
-		if (!this.tipo.equals("")) {
+	public void setTipo(String tipo) throws Exception {
+		if (this.tipo.equals("")) {
 			this.tipo = tipo;
 		} else {
 			throw new Exception("El sensor " + id + " es de tipo " + this.tipo);
 		}
 	}
 
-	public void setInvernadero(int invernadero) {
-		if(this.invernadero != -1) {
+	public void setInvernadero(int invernadero) throws Exception {
+		if(this.invernadero == -1) {
 			this.invernadero = invernadero;
 		} else {
 			throw new Exception("El sensor " + id + " ya pertenece a un invernadero");
