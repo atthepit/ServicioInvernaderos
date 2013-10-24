@@ -1,15 +1,21 @@
 import java.io.Serializable; 
 import java.rmi.*;
 import java.rmi.server.*;
+import java.io.IOException;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
 
 public class Sensor extends UnicastRemoteObject 
 						  implements iSensor, Serializable {
 	private String tipo;
 	private int invernadero;
 	private int id;
+	private Registry registry;
 
-	public Sensor(int id) throws java.rmi.RemoteException {
+	public Sensor(int id, String host) throws java.rmi.RemoteException {
 		super();
+		System.setSecurityManager(new RMISecurityManager());
+		registry = LocateRegistry.getRegistry(host,1099);
 		this.id = id;
 		this.invernadero = -1;
 		this.tipo = "";
@@ -39,13 +45,15 @@ public class Sensor extends UnicastRemoteObject
 		return invernadero;
 	}
 
-	public int getValor() {
+	public int getValor() throws java.rmi.RemoteException, IOException, NotBoundException, Exception {
 		int valor = -1;
+		iInvernadero inv = (iInvernadero) registry.lookup("/invernadero/" + this.invernadero);
 		if (tipo.equals("temperatura")) {
-			valor = 25;
+			valor = inv.getTemperatura();
 		} else {
-			valor = 47;
+			valor = inv.getHumedad();
 		}
+		System.out.println(valor);
 		return valor;
 	}
 }

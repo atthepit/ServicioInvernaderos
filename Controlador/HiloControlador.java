@@ -74,7 +74,7 @@ class HiloControlador extends Thread {
 			respuestaHTML = cabeceraHTML + "<p>" + respuesta + "</p>" + pieHTML;
 		} catch (Exception ex) {
 			String mensaje = ex.getMessage();
-			if (mensaje.length() == 3) {
+			if (mensaje != null && mensaje.length() == 3) {
 				respuestaHTML = mensaje;
 			} else {
 				System.err.println(mensaje);
@@ -137,12 +137,13 @@ class HiloControlador extends Thread {
        salida.flush();
     }
 
-    private boolean existeEnServidor(String objeto) throws java.rmi.RemoteException {
+    private boolean existeEnServidor(String objeto) throws java.rmi.RemoteException, Exception {
     	String[] lista = registry.list();
     	for (int i=0; i < lista.length; i++) {
 			if(lista[i].equals(objeto)) return true;
 		}
-		return false;
+		System.err.println("Objeto no encontrado: " + objeto);
+		throw new Exception("404");
     }
 
     private String[] obtenerPeticion(String cadena) throws Exception {
@@ -182,7 +183,7 @@ class HiloControlador extends Thread {
 		String valor = sensor.getValor() + "";
 		if(tipo.equals("temperatura")) {
 			valor += "ºC"; //TODO: Añadir comprobacion de valores
-		} else if(tipo.equals("temperatura")) {
+		} else if(tipo.equals("humedad")) {
 			valor += "%";
 		} else {
 			throw new Exception("500");

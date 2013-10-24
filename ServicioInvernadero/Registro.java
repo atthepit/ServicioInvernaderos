@@ -39,7 +39,7 @@ public class Registro {
                     registry.rebind(URLRegistro,invernadero);
                     System.out.println("Registrado");
                 } else if (opcion == 2) {
-                    Sensor sensor = new Sensor(id);
+                    Sensor sensor = new Sensor(id,host);
                     System.out.print("Introduce el tipo de sensor [temperatura/humedad]: ");
                     tipo = bufferRead.readLine();
                     sensor.setTipo(tipo);
@@ -56,7 +56,7 @@ public class Registro {
                     registry.rebind (URLRegistro, sensor);
                     System.out.println("Registrado");
                 } else if (opcion == 3) {
-                    Actuador actuador = new Actuador(id);
+                    Actuador actuador = new Actuador(id,host);
                     System.out.print("Introduce el id del invernadero al que pertenece: ");
                     int invernadero_id = Integer.parseInt(bufferRead.readLine());
                     iInvernadero invernadero = (iInvernadero) registry.lookup("/invernadero/" + invernadero_id);
