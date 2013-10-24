@@ -11,4 +11,13 @@ public interface iInvernadero extends Remote {
 	public int getActuador() throws java.rmi.RemoteException,Exception;
 	public int getTemperatura() throws java.rmi.RemoteException, Exception;
 	public int getHumedad() throws java.rmi.RemoteException, Exception;
+
+	public static final int MIN_TEMP = -10;
+  	public static final int MAX_TEMP = 45;
+  	public static final int MIN_TEMP_PERM = 25;
+  	public static final int MAX_TEMP_PERM = 35;
+  	public static final int MIN_HUM = 0;
+  	public static final int MAX_HUM = 100;
+  	public static final int MIN_HUM_PERM = 40;
+  	public static final int MAX_HUM_PERM = 75;
 }

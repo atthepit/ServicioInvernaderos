@@ -6,14 +6,6 @@ import java.io.*;
 public class Invernadero extends UnicastRemoteObject 
 						  implements iInvernadero, Serializable {
   	
-  	public static final int MIN_TEMP = -10;
-  	public static final int MAX_TEMP = 45;
-  	public static final int MIN_TEMP_PERM = 25;
-  	public static final int MAX_TEMP_PERM = 35;
-  	public static final int MIN_HUM = 0;
-  	public static final int MAX_HUM = 100;
-  	public static final int MIN_HUM_PERM = 40;
-  	public static final int MAX_HUM_PERM = 75;
 	public static final String nombreFichero = "valores.txt";
 	private int sensorTemperatura;
 	private int sensorHumedad;
@@ -40,7 +32,9 @@ public class Invernadero extends UnicastRemoteObject
 		if(this.sensorTemperatura == -1) {
 			this.sensorTemperatura = sensor;
 		} else {
-			throw new Exception("El invernadero " + id + " ya contiene un sensor de Temperatura");
+			String mensaje = "ERROR: El invernadero " + id + " ya contiene un sensor de Temperatura";
+			System.err.println(mensaje);
+			throw new Exception(mensaje);
 		}
 	}
 
@@ -48,7 +42,9 @@ public class Invernadero extends UnicastRemoteObject
 		if(this.sensorHumedad == -1) {
 			this.sensorHumedad = sensor;
 		} else {
-			throw new Exception("El invernadero " + id + " ya contiene un sensor de Humedad"); 
+			String mensaje = "ERROR: El invernadero " + id + " ya contiene un sensor de Humedad";
+			System.err.println(mensaje);
+			throw new Exception(mensaje); 
 		}
 	}
 
@@ -56,7 +52,9 @@ public class Invernadero extends UnicastRemoteObject
 		if(this.actuador == -1) {
 			this.actuador = actuador;
 		} else {
-			throw new Exception("El invernadero " + id + " ya contiene un Actuador");
+			String mensaje = "ERROR: El invernadero " + id + " ya contiene un Actuador";
+			System.err.println(mensaje);
+			throw new Exception(mensaje);
 		}
 	}
 
@@ -67,7 +65,9 @@ public class Invernadero extends UnicastRemoteObject
 		} else if(temperatura >= MIN_TEMP && temperatura <= MAX_TEMP) {
 			this.temperatura = temperatura;
 		} else {
-			throw new Exception("Temperatura fuera de rango: " + temperatura);
+			String mensaje = "ERROR: Temperatura fuera de rango: " + temperatura;
+			System.err.println(mensaje);
+			throw new Exception(mensaje);
 		}
 	}
 
@@ -78,7 +78,9 @@ public class Invernadero extends UnicastRemoteObject
 		} else if(humedad >= MIN_HUM && humedad <= MAX_HUM) {
 			this.humedad = humedad;
 		} else {
-			throw new Exception("Humedad fuera de rango: " + humedad);
+			String mensaje = "ERROR: Humedad fuera de rango: " + humedad;
+			System.err.println(mensaje);
+			throw new Exception(mensaje);
 		}
 	}
 
@@ -94,21 +96,25 @@ public class Invernadero extends UnicastRemoteObject
 		return actuador;
 	}
 
-	public int getTemperatura() throws IOException {
+	public int getTemperatura() throws IOException, Exception {
 		int temperatura = this.temperatura;
 		establecerNuevosValores();
 		return temperatura;
 	}
 
-	public int getHumedad() throws IOException {
+	public int getHumedad() throws IOException, Exception {
 		int humedad = this.humedad;
 		establecerNuevosValores();
 		return humedad;
 	}
 
-	private void establecerNuevosValores() throws IOException {
+	private void establecerNuevosValores() throws Exception {
 		String cadena =  entrada.readLine();
-		if (cadena == null) throw new IOException("Cadena vacia");
+		if (cadena == null) {
+			String mensaje = "ERROR: Nada leído";
+			System.err.println(mensaje);
+			throw new Exception(mensaje);
+		}
 		String[] valores = cadena.split(":");
 		this.temperatura = Integer.parseInt(valores[0]);
 		this.humedad = Integer.parseInt(valores[1]);
