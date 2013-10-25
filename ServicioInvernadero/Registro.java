@@ -9,6 +9,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.Exception;
 
+/**
+* Registro
+* Se encargará de registrar cada una de los objetos remotos en el 
+* servidor de objetos.
+* 
+* @author Pedro Paredes Andreu
+* @version 25.10.2013
+* @see Invernadero
+* @see Sensor
+* @see Actuador
+**/
 public class Registro {
     public static void main (String args[])     
     {
