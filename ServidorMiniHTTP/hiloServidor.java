@@ -113,7 +113,7 @@ public class HiloServidor extends Thread {
             codigoEstado = mensaje;
             respuesta = "";
             if(codigoEstado.equals("400")) {
-                mensajeEstado = "Bad Request";
+                mensajeEstado = "BAD REQUEST";
                 System.err.println(mensajeEstado);
             } else if(codigoEstado.equals("404")) {
                 mensajeEstado = "NOT FOUND";
@@ -123,6 +123,7 @@ public class HiloServidor extends Thread {
                 mensajeEstado = "INTERNAL SERVER ERROR";
                 System.err.println(mensajeEstado);
             }
+            respuesta = "<h1>" + codigoEstado + " - " + mensajeEstado + "</h1>";
         } finally {
             estado = httpVerison + " " + codigoEstado + " " + mensajeEstado;
             contentLength += respuesta.length()+";\n";

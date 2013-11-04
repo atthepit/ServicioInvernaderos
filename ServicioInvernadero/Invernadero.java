@@ -121,15 +121,19 @@ public class Invernadero extends UnicastRemoteObject
 	* @throws Exception si la temperatura esta fuera de rango.
 	**/
 	public void setTemperatura(int temperatura) throws Exception {
-		if (temperatura >= MIN_TEMP_PERM && temperatura <= MAX_TEMP_PERM) {
-			this.temperatura = temperatura;
-			escribeFichero();
-		} else if(temperatura >= MIN_TEMP && temperatura <= MAX_TEMP) {
-			this.temperatura = temperatura;
+		if(temperatura != -1) {
+			if (temperatura >= MIN_TEMP_PERM && temperatura <= MAX_TEMP_PERM) {
+				this.temperatura = temperatura;
+				escribeFichero();
+			} else if(temperatura >= MIN_TEMP && temperatura <= MAX_TEMP) {
+				this.temperatura = temperatura;
+			} else {
+				String mensaje = "ERROR: Temperatura fuera de rango: " + temperatura;
+				System.err.println(mensaje);
+				throw new Exception(mensaje);
+			}
 		} else {
-			String mensaje = "ERROR: Temperatura fuera de rango: " + temperatura;
-			System.err.println(mensaje);
-			throw new Exception(mensaje);
+			establecerNuevosValores();
 		}
 	}
 
@@ -139,15 +143,19 @@ public class Invernadero extends UnicastRemoteObject
 	* @throws Exception si la humedad esta fuera de rango.
 	**/
 	public void setHumedad(int humedad) throws Exception {
-		if (humedad >= MIN_HUM_PERM && humedad <= MAX_HUM_PERM) {
-			this.humedad = humedad;
-			escribeFichero();
-		} else if(humedad >= MIN_HUM && humedad <= MAX_HUM) {
-			this.humedad = humedad;
+		if(humedad != -1) {
+			if (humedad >= MIN_HUM_PERM && humedad <= MAX_HUM_PERM) {
+				this.humedad = humedad;
+				escribeFichero();
+			} else if(humedad >= MIN_HUM && humedad <= MAX_HUM) {
+				this.humedad = humedad;
+			} else {
+				String mensaje = "ERROR: Humedad fuera de rango: " + humedad;
+				System.err.println(mensaje);
+				throw new Exception(mensaje);
+			}
 		} else {
-			String mensaje = "ERROR: Humedad fuera de rango: " + humedad;
-			System.err.println(mensaje);
-			throw new Exception(mensaje);
+			establecerNuevosValores();
 		}
 	}
 
@@ -184,7 +192,6 @@ public class Invernadero extends UnicastRemoteObject
 	**/
 	public int getTemperatura() throws IOException, Exception {
 		int temperatura = this.temperatura;
-		establecerNuevosValores();
 		return temperatura;
 	}
 
@@ -197,7 +204,6 @@ public class Invernadero extends UnicastRemoteObject
 	**/
 	public int getHumedad() throws IOException, Exception {
 		int humedad = this.humedad;
-		establecerNuevosValores();
 		return humedad;
 	}
 

@@ -87,23 +87,26 @@ public class Actuador extends UnicastRemoteObject
   		boolean realizada = false;
       int valor = -1;
       iInvernadero inv = (iInvernadero) registry.lookup("/invernadero/" + this.invernadero);
-  		if (accion.equals("activarGoteo")) {
+  		if (accion.equals("activargoteo")) {
         valor = iInvernadero.MIN_HUM_PERM;
         inv.setHumedad(valor);
   			realizada = true;
-  		} else if(accion.equals("activarDeshumidificador")) {
+  		} else if(accion.equals("activardeshumidificador")) {
         valor = iInvernadero.MAX_HUM_PERM;
         inv.setHumedad(valor);
   			realizada = true;
-  		} else if(accion.equals("activarVentilacion")) {
+  		} else if(accion.equals("activarcalefaccion")) {
         valor = iInvernadero.MIN_TEMP_PERM;
         inv.setTemperatura(valor);
   			realizada = true;
-  		} else if(accion.equals("activarAperturaVentanas")) {
+  		} else if(accion.equals("activaraperturaventanas")) {
         valor = iInvernadero.MAX_TEMP_PERM;
         inv.setTemperatura(valor);
   			realizada = true;
-  		}
+  		} else if(accion.equals("establecervalor")) {
+        inv.setTemperatura(valor);
+        realizada = true;
+      }
   		return realizada;
   	}
 }

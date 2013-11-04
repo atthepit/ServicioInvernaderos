@@ -221,7 +221,25 @@ public class HiloControlador extends Thread {
     private String[] obtenerPeticion(String cadena) throws Exception {
     	if (cadena != null) {
     		if (cadena != "") {
-    			return cadena.split("/");
+    			try {
+	    			String metodo = cadena.split("\\?")[0].toLowerCase();
+	    			System.out.println(metodo);
+	    			if(metodo.equals("/controladorsd")){
+		    			String [] objeto = cadena.split("\\?")[1].split("&");
+		    			String id_invernadero = objeto[0].split("=")[1];
+		    			String accion = objeto[1].split("=")[0].toLowerCase();
+		    			if(accion.equals("accion")) accion = "actuador";
+		    			String id_accion = objeto[1].split("=")[1].toLowerCase();
+		    			String peticion = "/invernadero/" + id_invernadero + "/" + accion + "/" + id_accion;
+		    			System.out.println("Objeto remoto: " + peticion);
+		    			return peticion.split("/");
+		    		}else {
+		    			throw new Exception("400");
+		    		}
+	    		} catch(Exception e) {
+	    			System.err.println("ERROR: Petición no valida");
+	    			throw new Exception("400");
+	    		}
     		}
     	}
     	System.err.println("ERROR: URL no introducida");
@@ -242,7 +260,7 @@ public class HiloControlador extends Thread {
 				System.out.println("Solcicitando sensor " + peticion[4] + " al servidor de nombres");
 				objetoRemoto += peticion[3] + "/" + peticion[4];
 			} else if (peticion[3].equals("actuador")) {
-				System.out.println("Solicitando actuador del invernadero" + peticion[2]);
+				System.out.println("Solicitando actuador del invernadero " + peticion[2]);
 				objetoRemoto += peticion[3];
 			} else {
 				System.err.println("ERROR: Objeto '" + peticion[3] + "' invalido");
@@ -273,7 +291,7 @@ public class HiloControlador extends Thread {
 			valor += "ºC";
 			if(temp < iInvernadero.MIN_TEMP_PERM || temp > iInvernadero.MAX_TEMP_PERM) {
 				if (temp >= iInvernadero.MIN_TEMP && temp < iInvernadero.MIN_TEMP_PERM){ 
-					warning += " demasiado baja. ACTIVE EL SISTEMA DE VENTILACION";
+					warning += " demasiado baja. ACTIVE EL SISTEMA DE CALEFACCION";
 					mostrarWarning = true;
 				} else if(temp > iInvernadero.MAX_TEMP_PERM && temp <= iInvernadero.MAX_TEMP) { 
 					warning += " demasiado alta. ACTIVE LA APERTURA DE VENTANAS";
